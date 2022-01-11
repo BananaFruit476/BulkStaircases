@@ -1,9 +1,0 @@
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\bin\Debug\net50\BulkStaircases.deps.json
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\bin\Debug\net50\BulkStaircases.dll
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\bin\Debug\net50\BulkStaircases.pdb
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.GeneratedMSBuildEditorConfig.editorconfig
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.AssemblyInfoInputs.cache
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.AssemblyInfo.cs
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.csproj.CoreCompileInputs.cache
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.dll
-E:\Coding\Repositories\Modding\StardewValley\BulkStaircases\BulkStaircases\obj\Debug\net50\BulkStaircases.pdb
