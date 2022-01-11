@@ -10,15 +10,39 @@ namespace BulkStaircases
     /// <summary>The mod entry point.</summary>
     public class ModEntry : Mod
     {
+        /// <summary>
+        /// Field name of treasure room field, see MineShaft.cs
+        /// </summary>
         private static readonly string TREASUREFIELDNAME = "netIsTreasureRoom";
 
+        /// <summary>
+        /// Property name of quarry dungeon state, see MineShaft.cs
+        /// </summary>
+        private static readonly string QUARRYPROPERTYNAME = "isQuarryArea";
+
+        /// <summary>
+        /// Property name of monster area state, see MineShaft.cs
+        /// </summary>
+        private static readonly string MONSTERAREAPROPERTYNAME = "isMonsterArea";
+
+        /// <summary>
+        /// Property name of dinosaur area state, see MineShaft.cs
+        /// </summary>
+        private static readonly string DINOSAURAREAPROPERTYNAME = "isDinoArea";
+
+        /// <summary>
+        /// String for mines, see constructor of MineShaft.cs
+        /// </summary>
         private static readonly string UNDERGROUNDMINESTRING = "UndergroundMine";
 
         private ModConfig Config;
 
         private static readonly string STAIRCASENAME = "Staircase";
 
-        private static readonly int SPECIALSKULLCAVERNFLOOR = 220;
+        /// <summary>
+        /// Level 100 in skull cavern
+        /// </summary>
+        private static readonly int SKULLCAVERNLEVEL100FLOOR = 220;
 
         /*********
         ** Public methods
@@ -85,10 +109,6 @@ namespace BulkStaircases
                 }
             }
             // skull cavern
-            else if (!Config.SkipLevel100SkullCavern && shaft.mineLevel < SPECIALSKULLCAVERNFLOOR && shaft.mineLevel + numStairsCanBeUsed > SPECIALSKULLCAVERNFLOOR)
-            {
-                maxLevelsToDescend = SPECIALSKULLCAVERNFLOOR - shaft.mineLevel;
-            }
             else
             {
                 maxLevelsToDescend = numStairsCanBeUsed;
@@ -123,7 +143,6 @@ namespace BulkStaircases
             var location = request.Location;
             if (location is MineShaft mine)
             {
-                //this.Helper.Reflection.GetField<bool>()
                 if (!this.Config.SkipTreasureLevels)
                 {
                     IReflectedField<NetBool> treasureField = Helper.Reflection.GetField<NetBool>(mine, TREASUREFIELDNAME);
@@ -135,11 +154,47 @@ namespace BulkStaircases
                             return false;
                     }
                 }
+                if (!this.Config.SkipSlimeLevels)
+                {
+                    if (mine.isLevelSlimeArea())
+                        return false;
+                }
+                if (!this.Config.SkipQuarryDungeonLevels)
+                {
+                    if (IsBoolPropertyTrue(QUARRYPROPERTYNAME, mine))
+                        return false;
+                }
+                if (!this.Config.SkipMonsterLevels)
+                {
+                    if (IsBoolPropertyTrue(MONSTERAREAPROPERTYNAME, mine))
+                        return false;
+                }
+                if (!this.Config.SkipDinosaurLevels)
+                {
+                    if (IsBoolPropertyTrue(DINOSAURAREAPROPERTYNAME, mine))
+                        return false;
+                }
+                if (!this.Config.SkipLevel100SkullCavern)
+                {
+                    if (mine.mineLevel == SKULLCAVERNLEVEL100FLOOR)
+                        return false;
+                }
             }
             return true;
         }
+
+        private bool IsBoolPropertyTrue(string propertyName, object tobeCheckedForProperty)
+        {
+            IReflectedProperty<bool> dinosaurAreaProperty = Helper.Reflection.GetProperty<bool>(tobeCheckedForProperty, propertyName);
+            if (dinosaurAreaProperty != null)
+            {
+                return dinosaurAreaProperty.GetValue();
+            }
+            return false;
+        }
         private void warpFarmer(LocationRequest request)
         {
+            // constants taken from Game1.enterMine
             Game1.warpFarmer(request, 6, 6, 2);
         }
         
