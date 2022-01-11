@@ -6,5 +6,5 @@
   "UniqueID": "BananaFruit.BulkStaircases",
   "EntryDll": "BulkStaircases.dll",
   "MinimumApiVersion": "3.13.2",
-  "UpdateKeys": []
+  "UpdateKeys": [ "Nexus:10622" ]
 }
