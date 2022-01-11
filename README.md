@@ -7,7 +7,7 @@
 
 ## Install
 1. [Install the latest version of SMAPI](https://smapi.io/).
-3. Install [this mod from Nexus mods](tba).
+3. Install [this mod from Nexus mods](https://www.nexusmods.com/stardewvalley/mods/10622).
 4. Run the game using SMAPI.
 
 ## Use
