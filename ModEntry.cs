@@ -1,4 +1,5 @@
 ﻿using BulkStaircases.Framework;
+using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -9,6 +10,10 @@ namespace BulkStaircases
     /// <summary>The mod entry point.</summary>
     public class ModEntry : Mod
     {
+        private static readonly string TREASUREFIELDNAME = "netIsTreasureRoom";
+
+        private static readonly string UNDERGROUNDMINESTRING = "UndergroundMine";
+
         private ModConfig Config;
 
         private static readonly string STAIRCASENAME = "Staircase";
@@ -66,38 +71,86 @@ namespace BulkStaircases
                 Game1.addHUDMessage(new HUDMessage($"Only {heldItem.Stack} staircases left", 3));
                 return;
             }
-            int levelsToDescend;
+            int maxLevelsToDescend;
             // normal mine
             if (shaft.mineLevel >= 0 && shaft.mineLevel < MineShaft.bottomOfMineLevel)
             {
                 if(shaft.mineLevel + numStairsCanBeUsed > MineShaft.bottomOfMineLevel)
                 {
-                    levelsToDescend = MineShaft.bottomOfMineLevel - shaft.mineLevel;
+                    maxLevelsToDescend = MineShaft.bottomOfMineLevel - shaft.mineLevel;
                 }
                 else
                 {
-                    levelsToDescend = numStairsCanBeUsed;
+                    maxLevelsToDescend = numStairsCanBeUsed;
                 }
             }
             // skull cavern
-            else if (!Config.SkipLevel100SkullCavernLevel && shaft.mineLevel < SPECIALSKULLCAVERNFLOOR && shaft.mineLevel + numStairsCanBeUsed > SPECIALSKULLCAVERNFLOOR)
+            else if (!Config.SkipLevel100SkullCavern && shaft.mineLevel < SPECIALSKULLCAVERNFLOOR && shaft.mineLevel + numStairsCanBeUsed > SPECIALSKULLCAVERNFLOOR)
             {
-                levelsToDescend = SPECIALSKULLCAVERNFLOOR - shaft.mineLevel;
+                maxLevelsToDescend = SPECIALSKULLCAVERNFLOOR - shaft.mineLevel;
             }
             else
             {
-                levelsToDescend = numStairsCanBeUsed;
+                maxLevelsToDescend = numStairsCanBeUsed;
             }
-            Game1.enterMine(shaft.mineLevel + levelsToDescend);
-            MineShaft.numberOfCraftedStairsUsedThisRun += levelsToDescend;
-            if(heldItem.Stack > levelsToDescend)
+            int actualLevelsToDescend = 0;
+            LocationRequest levelToDescendTo;
+            do
             {
-                heldItem.Stack = heldItem.Stack - levelsToDescend;
+                actualLevelsToDescend++;
+                levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
+            }
+            while (SkipLevel(levelToDescendTo) && actualLevelsToDescend < maxLevelsToDescend);
+            warpFarmer(levelToDescendTo);
+            if (heldItem.Stack > actualLevelsToDescend)
+            {
+                heldItem.Stack -= actualLevelsToDescend;
             }
             else
             {
                 player.removeItemFromInventory(heldItem);
             }
+        }
+
+        /// <summary>
+        /// True if the level is to be skipped.
+        /// False otherwise.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        private bool SkipLevel(LocationRequest request)
+        {
+            var location = request.Location;
+            if (location is MineShaft mine)
+            {
+                //this.Helper.Reflection.GetField<bool>()
+                if (!this.Config.SkipTreasureLevels)
+                {
+                    IReflectedField<NetBool> treasureField = Helper.Reflection.GetField<NetBool>(mine, TREASUREFIELDNAME);
+                    if(treasureField != null)
+                    {
+                        NetBool val = treasureField.GetValue();
+                        bool isTreasure = val.Value;
+                        if (isTreasure)
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+        private void warpFarmer(LocationRequest request)
+        {
+            Game1.warpFarmer(request, 6, 6, 2);
+        }
+        
+        /// <summary>
+        /// Gets the location request for the given mine level
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        private LocationRequest GetLocationRequestForMineLevel(int level)
+        {
+            return Game1.getLocationRequest(UNDERGROUNDMINESTRING + level);
         }
     }
 }
