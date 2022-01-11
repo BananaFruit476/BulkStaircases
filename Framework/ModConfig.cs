@@ -24,14 +24,14 @@ namespace BulkStaircases.Framework
         /// <summary>Whether to skip level 100 in skull cavern.</summary>
         public bool SkipLevel100SkullCavern { get; set; } = false;
 
-        /// <summary>Whether to skip level 100 in skull cavern.</summary>
+        /// <summary>Whether to skip prehistoric floors.</summary>
         public bool SkipDinosaurLevels { get; set; } = false;
 
-        /// <summary>Whether to skip levels with treasure.</summary>
+        /// <summary>Whether to skip levels with a treasure.</summary>
         public bool SkipTreasureLevels { get; set; } = false;
 
         /// <summary>Whether to skip quarry dungeon levels that may appear after having been to the quarry mine.</summary>
-        public bool SkipQuarryDungeonLevels { get; set; } = true;
+        public bool SkipQuarryDungeonLevels { get; set; } = false;
 
         /// <summary>Whether to skip slime infested levels.</summary>
         public bool SkipSlimeLevels { get; set; } = false;
