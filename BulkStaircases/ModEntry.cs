@@ -124,6 +124,7 @@ namespace BulkStaircases
             warpFarmer(levelToDescendTo);
             if (heldItem.Stack > actualLevelsToDescend)
             {
+                MineShaft.numberOfCraftedStairsUsedThisRun += actualLevelsToDescend;
                 heldItem.Stack -= actualLevelsToDescend;
             }
             else
