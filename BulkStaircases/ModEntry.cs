@@ -4,6 +4,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
+using System;
 
 namespace BulkStaircases
 {
@@ -115,12 +116,33 @@ namespace BulkStaircases
             }
             int actualLevelsToDescend = 0;
             LocationRequest levelToDescendTo;
-            do
+            if (this.SkipAllLevels())
             {
-                actualLevelsToDescend++;
+                actualLevelsToDescend = maxLevelsToDescend;
                 levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
             }
-            while (SkipLevel(levelToDescendTo) && actualLevelsToDescend < maxLevelsToDescend);
+            else if (this.OnlyNotSkipLevel100SkullCavern())
+            {
+                if (121 <= shaft.mineLevel && shaft.mineLevel < ModEntry.SKULLCAVERNLEVEL100FLOOR)
+                {
+                    actualLevelsToDescend = Math.Min(maxLevelsToDescend, ModEntry.SKULLCAVERNLEVEL100FLOOR - shaft.mineLevel);
+                }
+                else
+                {
+                    actualLevelsToDescend = maxLevelsToDescend;
+                }
+                levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
+            }
+            // only actually calculate level if need be
+            else
+            {
+                do
+                {
+                    actualLevelsToDescend++;
+                    levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
+                }
+                while (SkipLevel(levelToDescendTo) && actualLevelsToDescend < maxLevelsToDescend);
+            }
             warpFarmer(levelToDescendTo);
             if (heldItem.Stack > actualLevelsToDescend)
             {
@@ -131,6 +153,34 @@ namespace BulkStaircases
             {
                 player.removeItemFromInventory(heldItem);
             }
+        }
+
+        /// <summary>
+        /// Checks if only skull cavern level 100 is not to be skipped
+        /// </summary>
+        /// <returns></returns>
+        private bool OnlyNotSkipLevel100SkullCavern()
+        {
+            return this.Config.SkipTreasureLevels
+                && this.Config.SkipSlimeLevels
+                && this.Config.SkipQuarryDungeonLevels
+                && this.Config.SkipMonsterLevels
+                && this.Config.SkipDinosaurLevels
+                && !this.Config.SkipLevel100SkullCavern;
+        }
+
+        /// <summary>
+        /// Checks if all levels are to be skipped
+        /// </summary>
+        /// <returns></returns>
+        private bool SkipAllLevels()
+        {
+            return this.Config.SkipTreasureLevels
+                && this.Config.SkipSlimeLevels
+                && this.Config.SkipQuarryDungeonLevels
+                && this.Config.SkipMonsterLevels
+                && this.Config.SkipDinosaurLevels
+                && this.Config.SkipLevel100SkullCavern;
         }
 
         /// <summary>
