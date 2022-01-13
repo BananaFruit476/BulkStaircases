@@ -38,6 +38,9 @@ namespace BulkStaircases.Framework
 
         /// <summary>Whether to skip monster infested levels.</summary>
         public bool SkipMonsterLevels { get; set; } = false;
+
+        /// <summary>Whether to skip mushroom levels.</summary>
+        public bool SkipMushroomLevels { get; set; } = false;
         
         public KeybindList ToggleKey { get; set; } = KeybindList.Parse("LeftShift + C");
     }

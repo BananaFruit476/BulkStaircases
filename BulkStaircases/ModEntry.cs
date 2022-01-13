@@ -166,6 +166,7 @@ namespace BulkStaircases
                 && this.Config.SkipQuarryDungeonLevels
                 && this.Config.SkipMonsterLevels
                 && this.Config.SkipDinosaurLevels
+                && this.Config.SkipMushroomLevels
                 && !this.Config.SkipLevel100SkullCavern;
         }
 
@@ -180,6 +181,7 @@ namespace BulkStaircases
                 && this.Config.SkipQuarryDungeonLevels
                 && this.Config.SkipMonsterLevels
                 && this.Config.SkipDinosaurLevels
+                && this.Config.SkipMushroomLevels
                 && this.Config.SkipLevel100SkullCavern;
         }
 
@@ -228,6 +230,11 @@ namespace BulkStaircases
                 if (!this.Config.SkipLevel100SkullCavern)
                 {
                     if (mine.mineLevel == SKULLCAVERNLEVEL100FLOOR)
+                        return false;
+                }
+                if (!this.Config.SkipMushroomLevels)
+                {
+                    if (MineShaft.mushroomLevelsGeneratedToday.Contains(mine.mineLevel))
                         return false;
                 }
             }
