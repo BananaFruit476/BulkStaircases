@@ -83,6 +83,14 @@ Default `false`. Whether to skip monster infested levels.
   </td>
 </tr>
 <tr>
+  <td><code>SkipMushroomLevels</code></td>
+  <td>
+
+Default `false`. Whether to skip mushroom levels.
+
+  </td>
+</tr>
+<tr>
   <td><code>ToggleKey</code></td>
   <td>
 
