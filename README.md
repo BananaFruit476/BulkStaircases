@@ -35,10 +35,26 @@ Default `0`. Number of staircases that will not be used in the held stack of sta
   </td>
 </tr>
 <tr>
-  <td><code>SkipLevel100SkullCavern</code></td>
+  <td><code>MaxLevelsToSkipPerUse</code></td>
   <td>
 
-Default `false`. Whether to skip level 100 in skull cavern.
+Default `-1`. How many levels to skip maximally per use.
+
+  </td>
+</tr>
+<tr>
+  <td><code>DoNotSkipSkullCavernLevels</code></td>
+  <td>
+
+Default `[100, 200, 300]`. Which skull cavern levels are not to be skipped.
+
+  </td>
+</tr>
+<tr>
+  <td><code>DoNotSkipMineLevels</code></td>
+  <td>
+
+Default `[]`. Which mine levels are not to be skipped.
 
   </td>
 </tr>
