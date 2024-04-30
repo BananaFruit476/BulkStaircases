@@ -38,7 +38,7 @@ Default `0`. Number of staircases that will not be used in the held stack of sta
   <td><code>MaxLevelsToSkipPerUse</code></td>
   <td>
 
-Default `-1`. How many levels to skip maximally per use. -1 indicates to restriction.
+Default `-1`. How many levels to skip maximally per use. -1 indicates no restriction.
 
   </td>
 </tr>
