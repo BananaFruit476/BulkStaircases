@@ -21,9 +21,14 @@ namespace BulkStaircases.Framework
                     this._numberOfStaircasesToLeaveInStack = value;
             }
         }
+        /// <summary>How many levels to skip maximally for each use of this feature</summary>
+        public int MaxLevelsToSkipPerUse { get; set; } = -1;
 
-        /// <summary>Whether to skip level 100 in skull cavern.</summary>
-        public bool SkipLevel100SkullCavern { get; set; } = false;
+        /// <summary> which skull cavern levels not to skip. Default 100, 200 and 300</summary>
+        public List<int> DoNotSkipSkullCavernLevels { get; set; } = new List<int> { 100, 200, 300 };
+
+        /// <summary> which mine levels not to skip. Default empty</summary>
+        public List<int> DoNotSkipMineLevels { get; set; } = new List<int> {};
 
         /// <summary>Whether to skip prehistoric floors.</summary>
         public bool SkipDinosaurLevels { get; set; } = false;

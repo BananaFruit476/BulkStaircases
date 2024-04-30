@@ -7,6 +7,8 @@ using StardewValley.Locations;
 using StardewValley.Monsters;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace BulkStaircases
 {
@@ -41,11 +43,6 @@ namespace BulkStaircases
         private ModConfig Config;
 
         private static readonly string STAIRCASENAME = "Staircase";
-
-        /// <summary>
-        /// Level 100 in skull cavern
-        /// </summary>
-        private static readonly int SKULLCAVERNLEVEL100FLOOR = 220;
 
         private static HashSet<string> MonsterFilterNames;
 
@@ -98,7 +95,29 @@ namespace BulkStaircases
                 Game1.addHUDMessage(new HUDMessage($"Can't use staircases here", 3));
                 return;
             }
-            var numStairsCanBeUsed = heldItem.Stack - Config.NumberOfStaircasesToLeaveInStack;
+            var maxLevelsToSkipPerUse = Config.MaxLevelsToSkipPerUse > 0 ? Config.MaxLevelsToSkipPerUse : int.MaxValue;
+            var numStairsCanBeUsed = Math.Min(heldItem.Stack - Config.NumberOfStaircasesToLeaveInStack, maxLevelsToSkipPerUse);
+
+            if (this.Config.DoNotSkipMineLevels.Count >= 0 && shaft.mineLevel <= MineShaft.bottomOfMineLevel && this.Config.DoNotSkipMineLevels.Any(n => n > shaft.mineLevel))
+            {
+                int? closestLevelDeeperThanCurrent = this.Config.DoNotSkipMineLevels.Where(n => n > shaft.mineLevel).Min();
+                if (closestLevelDeeperThanCurrent.HasValue)
+                {
+                    int difference = closestLevelDeeperThanCurrent.Value - shaft.mineLevel;
+                    numStairsCanBeUsed = Math.Min(numStairsCanBeUsed, difference);
+                }
+            }
+            var realSkullCavernLevel = shaft.mineLevel - MineShaft.bottomOfMineLevel;
+            if (this.Config.DoNotSkipSkullCavernLevels.Count > 0 && shaft.mineLevel > MineShaft.bottomOfMineLevel && this.Config.DoNotSkipSkullCavernLevels.Any(n => n > realSkullCavernLevel))
+            {
+                int? closestLevelDeeperThanCurrent = this.Config.DoNotSkipSkullCavernLevels.Where(n => n > realSkullCavernLevel).Min();
+                if (closestLevelDeeperThanCurrent.HasValue)
+                {
+                    int difference = closestLevelDeeperThanCurrent.Value - realSkullCavernLevel;
+                    numStairsCanBeUsed = Math.Min(numStairsCanBeUsed, difference);
+                }
+            }
+
             if (numStairsCanBeUsed <= 0)
             {
                 Game1.addHUDMessage(new HUDMessage($"Only {heldItem.Stack} staircases left", 3));
@@ -124,21 +143,9 @@ namespace BulkStaircases
             }
             int actualLevelsToDescend = 0;
             LocationRequest levelToDescendTo;
-            if (this.SkipAllLevels())
+            if (!this.NeedToCheckIndividualLevel())
             {
                 actualLevelsToDescend = maxLevelsToDescend;
-                levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
-            }
-            else if (this.OnlyNotSkipLevel100SkullCavern())
-            {
-                if (121 <= shaft.mineLevel && shaft.mineLevel < ModEntry.SKULLCAVERNLEVEL100FLOOR)
-                {
-                    actualLevelsToDescend = Math.Min(maxLevelsToDescend, ModEntry.SKULLCAVERNLEVEL100FLOOR - shaft.mineLevel);
-                }
-                else
-                {
-                    actualLevelsToDescend = maxLevelsToDescend;
-                }
                 levelToDescendTo = this.GetLocationRequestForMineLevel(shaft.mineLevel + actualLevelsToDescend);
             }
             // only actually calculate level if need be
@@ -164,35 +171,18 @@ namespace BulkStaircases
         }
 
         /// <summary>
-        /// Checks if only skull cavern level 100 is not to be skipped
+        /// Checks if individual levels need to be checked
         /// </summary>
         /// <returns></returns>
-        private bool OnlyNotSkipLevel100SkullCavern()
+        private bool NeedToCheckIndividualLevel()
         {
-            return this.Config.SkipTreasureLevels
-                && this.Config.SkipSlimeLevels
-                && this.Config.SkipQuarryDungeonLevels
-                && this.Config.SkipMonsterLevels
-                && this.Config.SkipDinosaurLevels
-                && this.Config.SkipMushroomLevels
-                && !this.Config.SkipLevel100SkullCavern
-                && ModEntry.MonsterFilterNames.Count == 0;
-        }
-
-        /// <summary>
-        /// Checks if all levels are to be skipped
-        /// </summary>
-        /// <returns></returns>
-        private bool SkipAllLevels()
-        {
-            return this.Config.SkipTreasureLevels
-                && this.Config.SkipSlimeLevels
-                && this.Config.SkipQuarryDungeonLevels
-                && this.Config.SkipMonsterLevels
-                && this.Config.SkipDinosaurLevels
-                && this.Config.SkipMushroomLevels
-                && this.Config.SkipLevel100SkullCavern
-                && ModEntry.MonsterFilterNames.Count == 0;
+            return !this.Config.SkipTreasureLevels
+                || !this.Config.SkipSlimeLevels
+                || !this.Config.SkipQuarryDungeonLevels
+                || !this.Config.SkipMonsterLevels
+                || !this.Config.SkipDinosaurLevels
+                || !this.Config.SkipMushroomLevels
+                || ModEntry.MonsterFilterNames.Count > 0;
         }
 
         /// <summary>
@@ -206,6 +196,17 @@ namespace BulkStaircases
             var location = request.Location;
             if (location is MineShaft mine)
             {
+                if(this.Config.DoNotSkipMineLevels.Count > 0)
+                {
+                    if (this.Config.DoNotSkipMineLevels.Contains(mine.mineLevel))
+                        return false;
+                }
+                if(this.Config.DoNotSkipSkullCavernLevels.Count > 0)
+                {
+                    var realSkullCavernLevel = mine.mineLevel - MineShaft.bottomOfMineLevel;
+                    if (this.Config.DoNotSkipSkullCavernLevels.Contains(realSkullCavernLevel))
+                        return false;
+                }
                 if (!this.Config.SkipTreasureLevels)
                 {
                     IReflectedField<NetBool> treasureField = Helper.Reflection.GetField<NetBool>(mine, TREASUREFIELDNAME);
@@ -235,11 +236,6 @@ namespace BulkStaircases
                 if (!this.Config.SkipDinosaurLevels)
                 {
                     if (IsBoolPropertyTrue(DINOSAURAREAPROPERTYNAME, mine))
-                        return false;
-                }
-                if (!this.Config.SkipLevel100SkullCavern)
-                {
-                    if (mine.mineLevel == SKULLCAVERNLEVEL100FLOOR)
                         return false;
                 }
                 if (this.LevelContainsInterestedMonsters(mine))
