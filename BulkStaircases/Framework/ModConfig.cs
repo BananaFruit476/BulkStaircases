@@ -50,7 +50,14 @@ namespace BulkStaircases.Framework
 
         /// <summaryDon't skip level with the monsters given here if there are at least the given number of them.</summary>
         public Dictionary<string, int> MonsterFilters { get; set; } = new ();
-        
+
+        /// <summaryDon't skip level with the monsters given here if there are at least the given number of them.</summary>
+        public Dictionary<string, int> NodeFilters { get; set; } = new Dictionary<string, int>
+        {
+            {"Iridium Node", 0},
+            {"Radioactive Node", 0}
+        };
+
         public KeybindList ToggleKey { get; set; } = KeybindList.Parse("LeftShift + C");
     }
 }

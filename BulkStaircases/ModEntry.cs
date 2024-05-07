@@ -247,8 +247,56 @@ namespace BulkStaircases
                     if (MineShaft.mushroomLevelsGeneratedToday.Contains(mine.mineLevel))
                         return false;
                 }
+                if (this.ContainsInterestingNodes(mine))
+                {
+                    return false;
+                }
             }
             return true;
+        }
+
+        private bool ContainsInterestingNodes(MineShaft mine)
+        {
+
+            var obj_to_num_dict = new Dictionary<string, int>();
+            foreach(var obj in mine.objects.Values)
+            {
+                if (!obj_to_num_dict.ContainsKey(obj.QualifiedItemId))
+                {
+                    obj_to_num_dict[obj.QualifiedItemId] = 0;
+                }
+                obj_to_num_dict[obj.QualifiedItemId] += 1;
+            }
+            if (this.Config.NodeFilters.Sum(kv => kv.Value) > 0)
+            {
+                foreach (var node_to_num in this.Config.NodeFilters)
+                {
+                    var node = node_to_num.Key;
+                    var num = node_to_num.Value;
+                    string node_id = string.Empty;
+                    switch (node)
+                    {
+                        case "Iridium Node":
+                            node_id = "(O)765";
+                            break;
+                        case "Radioactive Node":
+                            node_id = "(O)95";
+                            break;
+                        default:
+                            throw new NotImplementedException("Don't know that!");
+                    }
+                    int num_in_mine = 0;
+                    if (obj_to_num_dict.ContainsKey(node_id))
+                    {
+                        num_in_mine = obj_to_num_dict[node_id];
+                    }
+                    if (num > 0 && num_in_mine >= num)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool LevelContainsInterestedMonsters(MineShaft mine)
