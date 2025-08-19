@@ -1,4 +1,5 @@
 ﻿using BulkStaircases.Framework;
+using GenericModConfigMenu;
 using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -58,13 +59,97 @@ namespace BulkStaircases
             this.Config = helper.ReadConfig<ModConfig>();
             MonsterFilterNames = new HashSet<string>(this.Config.MonsterFilters.Keys);
             this.SetCountConfigDict();
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            IModEvents events = helper.Events;
+            events.Input.ButtonPressed += this.OnButtonPressed;
+            events.GameLoop.GameLaunched += this.OnGameLaunched;
         }
 
 
         /*********
         ** Private methods
         *********/
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            var configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenu is null)
+                return;
+
+            configMenu.Register(
+                mod: this.ModManifest,
+                reset: () => this.Config = new ModConfig(),
+                save: () => this.Helper.WriteConfig(this.Config)
+            );
+
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Number of staircases to leave in stack",
+                tooltip: () => "How many number of staircases are to be left in stack and not used up.",
+                getValue: () => this.Config.NumberOfStaircasesToLeaveInStack,
+                setValue: value => this.Config.NumberOfStaircasesToLeaveInStack = value,
+                min: 0,
+                formatValue: value => value > 0 ? value.ToString() : "None"
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Max levels to skip per use",
+                tooltip: () => "The maximum number of levels that are skipped per use.",
+                getValue: () => this.Config.MaxLevelsToSkipPerUse,
+                setValue: value => this.Config.MaxLevelsToSkipPerUse = value,
+                min: 0,
+                formatValue: value => value > 0 ? value.ToString() : "None"
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Dinosaur Levels",
+                tooltip: () => "Whether to skip dinosaur levels.",
+                getValue: () => this.Config.SkipDinosaurLevels,
+                setValue: value => this.Config.SkipDinosaurLevels = value
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Treasure Levels",
+                tooltip: () => "Whether to skip treasure levels.",
+                getValue: () => this.Config.SkipTreasureLevels,
+                setValue: value => this.Config.SkipTreasureLevels = value
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Quarry Dungeon Levels",
+                tooltip: () => "Whether to Quarry Dungeon levels.",
+                getValue: () => this.Config.SkipQuarryDungeonLevels,
+                setValue: value => this.Config.SkipQuarryDungeonLevels = value
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Slime Levels",
+                tooltip: () => "Whether to skip slime infested levels.",
+                getValue: () => this.Config.SkipSlimeLevels,
+                setValue: value => this.Config.SkipSlimeLevels = value
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Monster Levels",
+                tooltip: () => "Whether to skip monster infested levels.",
+                getValue: () => this.Config.SkipMonsterLevels,
+                setValue: value => this.Config.SkipMonsterLevels = value
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Skip Mushroom Levels",
+                tooltip: () => "Whether to skip mushroom levels.",
+                getValue: () => this.Config.SkipMushroomLevels,
+                setValue: value => this.Config.SkipMushroomLevels = value
+            );
+            configMenu.AddKeybindList(
+                mod: this.ModManifest,
+                name: () => "Keybind",
+                tooltip: () => "Keybind",
+                getValue: () => this.Config.ToggleKey,
+                setValue: value => this.Config.ToggleKey = value
+            );
+        }
+
+
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>

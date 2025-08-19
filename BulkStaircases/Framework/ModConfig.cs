@@ -22,7 +22,7 @@ namespace BulkStaircases.Framework
             }
         }
         /// <summary>How many levels to skip maximally for each use of this feature</summary>
-        public int MaxLevelsToSkipPerUse { get; set; } = -1;
+        public int MaxLevelsToSkipPerUse { get; set; } = 0;
 
         /// <summary> which skull cavern levels not to skip. Default 100, 200 and 300</summary>
         public List<int> DoNotSkipSkullCavernLevels { get; set; } = new List<int> { 100, 200, 300 };
