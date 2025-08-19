@@ -165,7 +165,7 @@ namespace BulkStaircases
             Farmer player = Game1.player;
             if (player == null)
                 return;
-            var staircases = player.Items.GetById(ModEntry.STAIRCASEID).ToList();
+            var staircases = player.Items.GetById(ModEntry.STAIRCASEID).OrderBy(staircase => staircase.Stack).ToList();
             if (staircases.Count == 0)
             {
                 Game1.addHUDMessage(new HUDMessage($"No staircases in inventory", 3));
