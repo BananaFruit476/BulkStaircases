@@ -43,7 +43,7 @@ namespace BulkStaircases
 
         private ModConfig Config;
 
-        private static readonly string STAIRCASENAME = "Staircase";
+        private static readonly string STAIRCASEID = "(BC)71";
 
         private static HashSet<string> MonsterFilterNames;
 
@@ -165,12 +165,14 @@ namespace BulkStaircases
             Farmer player = Game1.player;
             if (player == null)
                 return;
-            Item heldItem = player.CurrentItem;
-            if (heldItem == null)
+            var staircases = player.Items.GetById(ModEntry.STAIRCASEID).ToList();
+            if (staircases.Count == 0)
+            {
+                Game1.addHUDMessage(new HUDMessage($"No staircases in inventory", 3));
                 return;
-            if (heldItem.Name != ModEntry.STAIRCASENAME)
-                return;
-            if(shaft.mineLevel == MineShaft.bottomOfMineLevel)
+            }
+            int totalStaircases = staircases.Sum(item => item.Stack);
+            if (shaft.mineLevel == MineShaft.bottomOfMineLevel)
             {
                 Game1.addHUDMessage(new HUDMessage($"You're already at the bottom of the mines", 3));
                 return;
@@ -181,7 +183,7 @@ namespace BulkStaircases
                 return;
             }
             var maxLevelsToSkipPerUse = Config.MaxLevelsToSkipPerUse > 0 ? Config.MaxLevelsToSkipPerUse : int.MaxValue;
-            var numStairsCanBeUsed = Math.Min(heldItem.Stack - Config.NumberOfStaircasesToLeaveInStack, maxLevelsToSkipPerUse);
+            var numStairsCanBeUsed = Math.Min(totalStaircases - Config.NumberOfStaircasesToLeaveInStack, maxLevelsToSkipPerUse);
 
             if (this.Config.DoNotSkipMineLevels.Count >= 0 && shaft.mineLevel <= MineShaft.bottomOfMineLevel && this.Config.DoNotSkipMineLevels.Any(n => n > shaft.mineLevel))
             {
@@ -205,7 +207,7 @@ namespace BulkStaircases
 
             if (numStairsCanBeUsed <= 0)
             {
-                Game1.addHUDMessage(new HUDMessage($"Only {heldItem.Stack} staircases left", 3));
+                Game1.addHUDMessage(new HUDMessage($"Only {totalStaircases} staircases left", 3));
                 return;
             }
             int maxLevelsToDescend;
@@ -244,14 +246,20 @@ namespace BulkStaircases
                 while (SkipLevel(levelToDescendTo) && actualLevelsToDescend < maxLevelsToDescend);
             }
             warpFarmer(levelToDescendTo);
-            if (heldItem.Stack > actualLevelsToDescend)
+            MineShaft.numberOfCraftedStairsUsedThisRun += actualLevelsToDescend;
+            var stairs_to_remove = actualLevelsToDescend;
+            foreach (var staircase in staircases)
             {
-                MineShaft.numberOfCraftedStairsUsedThisRun += actualLevelsToDescend;
-                heldItem.Stack -= actualLevelsToDescend;
-            }
-            else
-            {
-                player.removeItemFromInventory(heldItem);
+                if (staircase.Stack > stairs_to_remove)
+                {
+                    staircase.Stack -= stairs_to_remove;
+                    break;
+                }
+                else
+                {
+                    stairs_to_remove -= staircase.Stack;
+                    player.removeItemFromInventory(staircase);
+                }
             }
         }
 
